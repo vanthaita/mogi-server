@@ -47,9 +47,7 @@ export class AuthController {
   @UseGuards(JWTAuthGuard)
   @Get('profile')
   async getProfile(@Request() req: AuthenticatedRequest) {
-    console.log(req.cookies);
     const accessToken = req.cookies['access_token'];
-    console.log(req.cookies, 'user', req.user);
     if (accessToken) return await this.authService.getUser(req.user.email);
     throw new UnauthorizedException('No access token');
   }
@@ -57,6 +55,7 @@ export class AuthController {
   @Get('logout')
   async logout(@Req() req: AuthenticatedRequest, @Res() res: Response) {
     res.clearCookie('access_token', { httpOnly: true, path: '/' });
+    res.clearCookie('refresh_token', { httpOnly: true, path: '/' });
     res.redirect(`${process.env.NEXT_PUBLIC_URL}/`);
   }
 

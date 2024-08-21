@@ -1,9 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma.service';
 import axios from 'axios';
-import { UserDto } from './dto/user.dto';
+import { SignInDto, SignUpDto, UserDto } from './dto/auth.dto';
 import { User } from '@prisma/client';
+import * as argon2 from 'argon2';
 @Injectable()
 export class AuthService {
   constructor(
@@ -144,5 +149,69 @@ export class AuthService {
     } catch (error) {
       console.error('Failed to revoke the token:', error);
     }
+  }
+
+  //  Sign In
+  async signIn(signInDto: SignInDto) {
+    const { password, email } = signInDto;
+
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    console.log(password);
+    const passwordMatch = await argon2.verify(user.passwordHash, password);
+    console.log(passwordMatch);
+    if (!passwordMatch) {
+      throw new UnauthorizedException('Password is incorrect');
+    }
+
+    const payload = { sub: user.id, email: user.email };
+
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: { refreshToken },
+    });
+    console.log(user);
+
+    return {
+      access_token: this.jwtService.sign(payload),
+      refresh_token: refreshToken,
+    };
+  }
+
+  async signUp(signUpDto: SignUpDto) {
+    const { email, name, password } = signUpDto;
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (user) {
+      throw new ConflictException('User already exists');
+    }
+    const hashedPassword = await argon2.hash(password);
+    const newUser = await this.prismaService.user.create({
+      data: {
+        email,
+        name,
+        passwordHash: hashedPassword,
+        providerId: 'jwt3091283lkfjk',
+      },
+    });
+
+    return {
+      message: 'User successfully registered',
+      userId: newUser.id,
+      email: newUser.email,
+    };
   }
 }

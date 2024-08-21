@@ -9,8 +9,11 @@ import {
   Res,
   Req,
   UnauthorizedException,
+  Body,
+  Post,
 } from '@nestjs/common';
 import { AuthGuard as JWTAuthGuard } from './auth.guard';
+import { SignInDto, SignUpDto } from './dto/auth.dto';
 
 interface AuthenticatedRequest extends ExpressRequest {
   user: {
@@ -56,7 +59,10 @@ export class AuthController {
   async logout(@Req() req: AuthenticatedRequest, @Res() res: Response) {
     res.clearCookie('access_token', { httpOnly: true, path: '/' });
     res.clearCookie('refresh_token', { httpOnly: true, path: '/' });
-    res.redirect(`${process.env.NEXT_PUBLIC_URL}/`);
+    // res.redirect(`${process.env.NEXT_PUBLIC_URL}/`);
+    return {
+      message: 'Logged out',
+    };
   }
 
   @UseGuards(JWTAuthGuard)
@@ -84,5 +90,38 @@ export class AuthController {
         res.status(500).send({ message: 'Internal server error.' });
       }
     }
+  }
+
+  @Post('sign-in')
+  async signIn(@Body() signInDto: SignInDto, @Res() res: Response) {
+    try {
+      const { access_token, refresh_token } =
+        await this.authService.signIn(signInDto);
+      console.log(access_token, refresh_token);
+
+      res.cookie('access_token', access_token, {
+        httpOnly: true,
+        sameSite: 'lax',
+      });
+      res.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        sameSite: 'lax',
+      });
+
+      return res.status(200).json({
+        message: 'Successfully logged in',
+        access_token,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Login failed',
+        error: error.message,
+      });
+    }
+  }
+  @Post('sign-up')
+  async signUp(@Body() signUpDto: SignUpDto) {
+    await this.authService.signUp(signUpDto);
+    return { message: 'Sign Up successful' };
   }
 }

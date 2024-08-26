@@ -20,7 +20,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     };
   }
   async validate(access_token: string, refresh_token: string) {
-    console.log(refresh_token);
     const user = {
       accessToken: access_token,
       refreshToken: refresh_token,

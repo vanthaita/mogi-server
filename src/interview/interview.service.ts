@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { InterviewDto } from './dto/interview.dto';
 import { AnswerQuestionDto } from './dto/user.answer.dto';
+import { SearchMockInterviewDto } from './dto/search.dto';
 @Injectable()
 export class InterviewService {
   constructor(private prismaService: PrismaService) {}
@@ -35,7 +36,7 @@ export class InterviewService {
       return responseData.id;
     } catch (err) {
       console.error('Error saving interview data:', err);
-      throw err; // Re-throw the error if needed for further handling
+      throw err;
     }
   }
 
@@ -108,7 +109,36 @@ export class InterviewService {
     });
     return FeedBackData;
   }
+  async searchMockInterview(searchDto: SearchMockInterviewDto) {
+    const { jobPosition, page = 1, limit = 4 } = searchDto;
 
+    const [mockInterviews, totalCount] = await Promise.all([
+      this.prismaService.mockInterview.findMany({
+        where: {
+          jobPosition: {
+            contains: jobPosition || '',
+            mode: 'insensitive',
+          },
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prismaService.mockInterview.count({
+        where: {
+          jobPosition: {
+            contains: jobPosition || '',
+            mode: 'insensitive',
+          },
+        },
+      }),
+    ]);
+    return {
+      mockInterviews,
+      totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+      currentPage: page,
+    };
+  }
   async GetAllInterviewData({ userId }: { userId: string }) {
     const FeedBackData = await this.prismaService.user.findUnique({
       where: { id: userId },

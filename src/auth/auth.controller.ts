@@ -59,7 +59,7 @@ export class AuthController {
   async logout(@Req() req: AuthenticatedRequest, @Res() res: Response) {
     res.clearCookie('access_token', { httpOnly: true, path: '/' });
     res.clearCookie('refresh_token', { httpOnly: true, path: '/' });
-    // res.redirect(`${process.env.NEXT_PUBLIC_URL}/`);
+    res.redirect(`${process.env.NEXT_PUBLIC_URL}/`);
     return {
       message: 'Logged out',
     };

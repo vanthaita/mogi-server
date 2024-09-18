@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { InterviewService } from './interview.service';
 import { InterviewDto } from './dto/interview.dto';
-import { chatSession } from 'src/utils/gemini.ai';
+import { chatSession } from '../utils/gemini.ai';
 import { AuthGuard as JWTAuthGuard } from 'src/auth/auth.guard';
 import { AnswerQuestionDto } from './dto/user.answer.dto';
 import { SearchMockInterviewDto } from './dto/search.dto';

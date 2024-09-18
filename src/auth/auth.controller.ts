@@ -99,15 +99,8 @@ export class AuthController {
         await this.authService.signIn(signInDto);
       console.log(access_token, refresh_token);
 
-      res.cookie('access_token', access_token, {
-        httpOnly: true,
-        sameSite: 'lax',
-      });
-      res.cookie('refresh_token', refresh_token, {
-        httpOnly: true,
-        sameSite: 'lax',
-      });
-
+      res.cookie('access_token', access_token, { httpOnly: true });
+      res.cookie('refresh_token', refresh_token, { httpOnly: true });
       return res.status(200).json({
         message: 'Successfully logged in',
         access_token,

@@ -1,17 +1,31 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { InterviewService } from './interview.service';
 import { InterviewDto } from './dto/interview.dto';
 import { chatSession } from 'src/utils/gemini.ai';
 import { AuthGuard as JWTAuthGuard } from 'src/auth/auth.guard';
 import { AnswerQuestionDto } from './dto/user.answer.dto';
+import { SearchMockInterviewDto } from './dto/search.dto';
 @Controller('interview')
 @UseGuards(JWTAuthGuard)
 export class InterviewController {
   constructor(private readonly interviewService: InterviewService) {}
+
+  @Get('search')
+  async searchMockInterview(@Query() searchDto: SearchMockInterviewDto) {
+    console.log('Received searchDto:', searchDto);
+    return this.interviewService.searchMockInterview(searchDto);
+  }
   @Post('create')
   async saveInterviewData(@Body() interviewDto: InterviewDto) {
     const InputPromptTemplate = process.env.INPUT_PROMPT;
-    console.log(InputPromptTemplate);
     const InputPrompt = InputPromptTemplate.replace(
       '{{jobPosition}}',
       interviewDto.jobPosition,
@@ -27,7 +41,6 @@ export class InterviewController {
       ...interviewDto,
       jsonMockResp: MockJsonResponse,
     });
-    console.log(saveInterviewResponse);
     return { interviewId: saveInterviewResponse };
   }
   @Post('feedback')
@@ -66,7 +79,6 @@ export class InterviewController {
       });
     return getInterviewDataResponse;
   }
-
   @Get('user/:userId')
   async getAllInterviewData(@Param('userId') userId: string) {
     const getAllInterviewResponse =

@@ -38,8 +38,12 @@ export class AuthController {
   ) {
     const googleToken = req.user.accessToken;
     const authRes = await this.authService.authenticate(googleToken);
-    res.cookie('access_token', authRes.access_token, { httpOnly: true });
-    res.cookie('refresh_token', authRes.refresh_token, { httpOnly: true });
+    res.cookie('access_token', authRes.access_token, {
+      httpOnly: true,
+    });
+    res.cookie('refresh_token', authRes.refresh_token, {
+      httpOnly: true,
+    });
     res.redirect(`${process.env.NEXT_PUBLIC_URL}/dashboard`);
     // res.send({
     //   message: 'Successfully logged in',
@@ -99,8 +103,14 @@ export class AuthController {
         await this.authService.signIn(signInDto);
       console.log(access_token, refresh_token);
 
-      res.cookie('access_token', access_token, { httpOnly: true });
-      res.cookie('refresh_token', refresh_token, { httpOnly: true });
+      res.cookie('access_token', access_token, {
+        httpOnly: true,
+        path: '/',
+      });
+      res.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        path: '/',
+      });
       return res.status(200).json({
         message: 'Successfully logged in',
         access_token,

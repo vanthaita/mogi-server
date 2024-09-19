@@ -40,21 +40,17 @@ export class AuthController {
     const authRes = await this.authService.authenticate(googleToken);
     res.cookie('access_token', authRes.access_token, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      path: '/',
+      maxAge: 60 * 60 * 1000,
     });
     res.cookie('refresh_token', authRes.refresh_token, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      path: '/',
+      maxAge: 60 * 60 * 24 * 1000, // 1 day
     });
-    res.redirect(`${process.env.NEXT_PUBLIC_URL}/dashboard`);
-    // res.send({
-    //   message: 'Successfully logged in',
-    //   access_token: authRes.access_token,
-    // });
+    // res.redirect(`${process.env.NEXT_PUBLIC_URL}/dashboard`);
+    res.send({
+      message: 'Successfully logged in',
+      access_token: authRes.access_token,
+    });
   }
 
   @UseGuards(JWTAuthGuard)
@@ -111,15 +107,9 @@ export class AuthController {
 
       res.cookie('access_token', access_token, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        path: '/',
       });
       res.cookie('refresh_token', refresh_token, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        path: '/',
       });
       return res.status(200).json({
         message: 'Successfully logged in',

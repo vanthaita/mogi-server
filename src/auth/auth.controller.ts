@@ -32,25 +32,27 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleLoginCallback(
-    @Request() req: AuthenticatedRequest,
-    @Res() res: Response,
-  ) {
+  async googleLoginCallback(@Request() req: AuthenticatedRequest) {
     const googleToken = req.user.accessToken;
     const authRes = await this.authService.authenticate(googleToken);
-    res.cookie('access_token', authRes.access_token, {
-      httpOnly: true,
-      maxAge: 60 * 60 * 1000,
-    });
-    res.cookie('refresh_token', authRes.refresh_token, {
-      httpOnly: true,
-      maxAge: 60 * 60 * 24 * 1000, // 1 day
-    });
+    // res.cookie('access_token', authRes.access_token, {
+    //   sameSite: 'none',
+    //   secure: true,
+    //   httpOnly: true,
+    //   path: '/',
+    // });
+    // res.cookie('refresh_token', authRes.refresh_token, {
+    //   sameSite: 'none',
+    //   secure: true,
+    //   httpOnly: true,
+    //   path: '/',
+    // });
     // res.redirect(`${process.env.NEXT_PUBLIC_URL}/dashboard`);
-    res.send({
-      message: 'Successfully logged in',
+    return {
+      message: 'Logged in with Google',
       access_token: authRes.access_token,
-    });
+      refresh_token: authRes.refresh_token,
+    };
   }
 
   @UseGuards(JWTAuthGuard)
@@ -105,15 +107,22 @@ export class AuthController {
         await this.authService.signIn(signInDto);
       console.log(access_token, refresh_token);
 
-      res.cookie('access_token', access_token, {
-        httpOnly: true,
-      });
-      res.cookie('refresh_token', refresh_token, {
-        httpOnly: true,
-      });
+      // res.cookie('access_token', access_token, {
+      //   sameSite: 'none',
+      //   secure: true,
+      //   httpOnly: true,
+      //   path: '/',
+      // });
+      // res.cookie('refresh_token', refresh_token, {
+      //   sameSite: 'none',
+      //   secure: true,
+      //   httpOnly: true,
+      //   path: '/',
+      // });
       return res.status(200).json({
         message: 'Successfully logged in',
         access_token,
+        refresh_token,
       });
     } catch (error) {
       return res.status(500).json({

@@ -6,6 +6,7 @@ import {
   NestExpressApplication,
 } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(
@@ -14,17 +15,28 @@ async function bootstrap() {
   );
 
   const configService = app.get(ConfigService);
-  const COOKIE_SECRET = configService.get<string>('COOKIE_SECRET');
   const PORT = configService.get<string>('PORT') || 8386;
   const HOST = configService.get<string>('HOST') || '0.0.0.0';
-  const FRONTEND_URL =
-    configService.get<string>('NEXT_PUBLIC_URL') ||
-    'https://mogi-three.vercel.app';
+  const URL =
+    configService.get<string>('NEXT_PUBLIC_URL') || 'http://localhost:3000';
   app.enableCors({
-    origin: FRONTEND_URL,
+    origin: URL,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   });
-  app.use(cookieParser(COOKIE_SECRET));
+  app.use(cookieParser());
+
+  const config = new DocumentBuilder()
+    .setTitle('Mogi')
+    .setDescription('Mogi - AI MOCK INTERVIEW')
+    .addCookieAuth()
+    .setVersion('1.0')
+    .addTag('Kapi')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
   await app.listen(PORT, HOST);
   console.log(`Server running at http://${HOST}:${PORT}`);
 }

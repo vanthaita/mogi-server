@@ -80,7 +80,7 @@ export class AuthController {
       const refreshToken = req.cookies['refresh_token'];
       const { access_token } =
         await this.authService.getAccessTokenUser(refreshToken);
-      res.cookie('access_token', access_token, { httpOnly: true });
+      // res.cookie('access_token', access_token, { httpOnly: true });
       return {
         message: 'Token is valid',
         access_token,

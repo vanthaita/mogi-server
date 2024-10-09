@@ -13,10 +13,14 @@ import { chatSession } from '../utils/gemini.ai';
 import { AuthGuard as JWTAuthGuard } from 'src/auth/auth.guard';
 import { AnswerQuestionDto } from './dto/user.answer.dto';
 import { SearchMockInterviewDto } from './dto/search.dto';
+import { ConfigService } from '@nestjs/config/dist/config.service';
 @Controller('interview')
 @UseGuards(JWTAuthGuard)
 export class InterviewController {
-  constructor(private readonly interviewService: InterviewService) {}
+  constructor(
+    private readonly interviewService: InterviewService,
+    private readonly configService: ConfigService
+  ) {}
 
   @Get('search')
   async searchMockInterview(@Query() searchDto: SearchMockInterviewDto) {
@@ -25,7 +29,8 @@ export class InterviewController {
   }
   @Post('create')
   async saveInterviewData(@Body() interviewDto: InterviewDto) {
-    const InputPromptTemplate = process.env.INPUT_PROMPT;
+    const InputPromptTemplate = this.configService.get<string>('INPUT_PROMPT');
+    console.log(InputPromptTemplate);
     const InputPrompt = InputPromptTemplate.replace(
       '{{jobPosition}}',
       interviewDto.jobPosition,

@@ -35,19 +35,6 @@ export class AuthController {
   async googleLoginCallback(@Request() req: AuthenticatedRequest) {
     const googleToken = req.user.accessToken;
     const authRes = await this.authService.authenticate(googleToken);
-    // res.cookie('access_token', authRes.access_token, {
-    //   sameSite: 'none',
-    //   secure: true,
-    //   httpOnly: true,
-    //   path: '/',
-    // });
-    // res.cookie('refresh_token', authRes.refresh_token, {
-    //   sameSite: 'none',
-    //   secure: true,
-    //   httpOnly: true,
-    //   path: '/',
-    // });
-    // res.redirect(`${process.env.NEXT_PUBLIC_URL}/dashboard`);
     return {
       message: 'Logged in with Google',
       access_token: authRes.access_token,
@@ -58,8 +45,9 @@ export class AuthController {
   @UseGuards(JWTAuthGuard)
   @Get('profile')
   async getProfile(@Request() req: AuthenticatedRequest) {
-    console.log(req.cookies);
+    console.log("Access Token: ",req.cookies['access_token']);
     const accessToken = req.cookies['access_token'];
+    console.log("Access token here: ", accessToken);
     if (accessToken) return await this.authService.getUser(req.user.email);
     throw new UnauthorizedException('No access token');
   }
@@ -81,7 +69,6 @@ export class AuthController {
       const refreshToken = req.cookies['refresh_token'];
       const { access_token } =
         await this.authService.getAccessTokenUser(refreshToken);
-      // res.cookie('access_token', access_token, { httpOnly: true });
       return {
         message: 'Token is valid',
         access_token,
@@ -107,19 +94,6 @@ export class AuthController {
       const { access_token, refresh_token } =
         await this.authService.signIn(signInDto);
       console.log(access_token, refresh_token);
-
-      // res.cookie('access_token', access_token, {
-      //   sameSite: 'none',
-      //   secure: true,
-      //   httpOnly: true,
-      //   path: '/',
-      // });
-      // res.cookie('refresh_token', refresh_token, {
-      //   sameSite: 'none',
-      //   secure: true,
-      //   httpOnly: true,
-      //   path: '/',
-      // });
       return res.status(200).json({
         message: 'Successfully logged in',
         access_token,

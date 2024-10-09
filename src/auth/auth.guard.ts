@@ -18,12 +18,10 @@ export class AuthGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException('Token not provided');
     }
-
     try {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
-
       request['user'] = {
         id: payload.sub,
         email: payload.email,
@@ -35,8 +33,6 @@ export class AuthGuard implements CanActivate {
     return true;
   }
   private extractTokenFromCookie(request: Request): string | undefined {
-    console.log('Extracting token from cookie', request);
-    console.log('Extracting token from cookie', request['access_token']);
     return request.cookies['access_token'];
   }
 }

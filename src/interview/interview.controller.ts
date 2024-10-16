@@ -86,6 +86,7 @@ export class InterviewController {
   }
   @Get('user/:userId')
   async getAllInterviewData(@Param('userId') userId: string) {
+    console.log("interview")
     const getAllInterviewResponse =
       await this.interviewService.GetAllInterviewData({
         userId: userId,

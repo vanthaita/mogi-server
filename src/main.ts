@@ -23,6 +23,7 @@ async function bootstrap() {
     origin: URL,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
+    allowedHeaders: 'Authorization, Content-Type',
   });
   app.use(cookieParser());
 

@@ -9,6 +9,17 @@ import axios from 'axios';
 import { SignInDto, SignUpDto, UserDto } from './dto/auth.dto';
 import { User } from '@prisma/client';
 import * as argon2 from 'argon2';
+type UserWithoutSensitiveInfo = {
+  id: string;
+  name: string;
+  email: string;
+  picture: string;
+  providerId: string;
+  familyName: string;
+  givenName: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 @Injectable()
 export class AuthService {
   constructor(
@@ -117,10 +128,22 @@ export class AuthService {
     }
   }
 
-  async getUser(email: string): Promise<User> {
+  async getUser(email: string): Promise<UserWithoutSensitiveInfo> {
     try {
       return await this.prismaService.user.findUnique({
         where: { email },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          picture: true,
+          providerId: true,
+          familyName: true,
+          givenName: true,
+          createdAt: true,
+          updatedAt: true,
+          // No need to include passwordHash and refreshToken here
+        },
       });
     } catch (error) {
       throw new Error('Failed to get user.');

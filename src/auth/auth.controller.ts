@@ -45,7 +45,8 @@ export class AuthController {
   @UseGuards(JWTAuthGuard)
   @Get('profile')
   async getProfile(@Request() req: AuthenticatedRequest) {
-    console.log("Access Token: ",req.cookies['access_token']);
+    // console.log("Access Token: ",req.cookies['access_token']);
+    console.log("User", typeof req['user']);
     const accessToken = req.cookies['access_token'];
     console.log("Access token here: ", accessToken);
     if (accessToken) return await this.authService.getUser(req.user.email);
